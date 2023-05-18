@@ -1,0 +1,53 @@
+databaseChangeLog: 
+  -  changeSet:
+      validCheckSum: ANY
+      id:  2
+      author:  lantum  
+      changes:  
+        -  createTable:  
+            tableName:  loan_order
+            columns:
+            -  column:  
+                  name:  id  
+                  type:  integer
+                  autoIncrement:  true  
+                  constraints:  
+                    primaryKey:  true
+                    nullable: false
+            -  column:  
+                  name:  order_id  
+                  type:  varchar(255)
+                  constraints:
+                    nullable: false
+            -  column:  
+                  name:  user_id  
+                  type:  integer
+                  constraints:
+                    nullable: false
+            -  column:  
+                  name:  tariff_id  
+                  type:  integer
+                  constraints:
+                    nullable: false
+                    foreignKeyName: tariff_id_foreign_key
+                    references: tariff(id)
+            -  column:  
+                  name:  credit_rating  
+                  type:  double
+                  constraints:
+                    nullable: false
+            -  column:  
+                  name:  status  
+                  type:  varchar(255)
+                  constraints:
+                    nullable: false
+            -  column:  
+                  name:  time_insert  
+                  type:  timestamp  
+                  constraints:
+                    nullable: false
+            -  column:  
+                  name:  time_update  
+                  type:  timestamp  
+                  constraints:
+                    nullable: false

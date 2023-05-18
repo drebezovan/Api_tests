@@ -1,0 +1,10 @@
+tariffs:
+  - id: 1
+    type: "BUSINESS"
+    interestRate: "2%"
+  - id: 2
+    type: "CONSUMER"
+    interestRate: "10%"
+  - id: 3
+    type: "RETIRED"
+    interestRate: "4%"

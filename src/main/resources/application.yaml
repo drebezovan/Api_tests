@@ -1,0 +1,13 @@
+spring:
+  liquibase:
+    enabled: true
+    change-log: classpath:db_changelog.yaml
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/MTS_Credit_App"
+    driver-class-name: org.postgresql.Driver
+    username: user
+    password: 1234
+
+
+
+

@@ -1,0 +1,8 @@
+databaseChangeLog:
+    - include:
+        file: databases/tariff_table.yaml
+        relativeToChangelogFile: true
+    - include:
+        file: databases/loan_table.yaml
+        relativeToChangelogFile: true
+

@@ -19,4 +19,5 @@ public interface LoanOrderRep {
     int updateOrderStatus(long id, String status);
     int updateTimeUpdate(long id, Timestamp timeUpdate);
     Optional<List> getAllOrdersWithStatus(String status);
+    void deleteAllOrders();
 }

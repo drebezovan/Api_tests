@@ -13,4 +13,7 @@ public class Tariff {
     private long id;
     private String type;
     private String interestRate;
+
+    public Tariff() {
+    }
 }

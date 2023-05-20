@@ -1,9 +1,6 @@
 package spec;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.mts.creditapp.entity.tableEntities.Tariff;
@@ -13,9 +10,17 @@ import org.junit.jupiter.api.Assertions;
 
 import java.io.File;
 import java.io.IOException;
+
+import org.junit.jupiter.api.function.Executable;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GetTariffsSpec {
     static ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -26,26 +31,45 @@ public class GetTariffsSpec {
 
     static File file = new File("src/test/java/testData/defaultTariffs.yml");
 
-    public static List<Tariff> getTariffs() throws JsonProcessingException {
-
-        String output = given()
+    public static Map<String, Tariff> getTariffsMap() {
+        List<Tariff> tariffs = given()
                 .spec(BaseSpec.getRequestSpec())
                 .when()
                 .contentType(ContentType.JSON)
                 .get("/loan-service/getTariffs")
                 .then()
                 .spec(BaseSpec.getResponseSpec(200))
-                .extract().body().toString();
-        JsonNode jsonDataNode = mapper.readTree(output);
-        JsonNode tariffsNode = jsonDataNode.get("data");
-        return mapper.readValue(tariffsNode.asText(), new TypeReference<>() {});
+                .extract().body().jsonPath().getObject("data", GetTariffsResponse.class).getTariffs();
+        Map<String, Tariff> hashMap = new HashMap<>();
+        for (Tariff tariff : tariffs) {
+            hashMap.put(tariff.getType(), tariff);
+        }
+        return hashMap;
     }
 
-    public static void getYaml() throws IOException {
-        System.out.println(mapper.readValue(file, GetTariffsResponse.class).getTariffs());
+    public static Map<String, Tariff> getReferenceTariffsMap() throws IOException {
+        List<Tariff> tariffs = mapper.readValue(file, GetTariffsResponse.class).getTariffs();
+        Map<String, Tariff> hashMap = new HashMap<>();
+        for (Tariff tariff : tariffs) {
+            hashMap.put(tariff.getType(), tariff);
+        }
+        return hashMap;
     }
 
-    public static void assertGetTariff(GetTariffsResponse response) throws IOException {
-        Assertions.assertEquals(mapper.readValue(file, GetTariffsResponse.class).getTariffs(), response.getTariffs());
+    public static void assertMapEquals(Map<String, Tariff> map1, Map<String, Tariff> map2) {
+        List<Executable> assertsList = new ArrayList<>();
+        assertsList.add(() -> assertEquals(map1.size(), map2.size()));
+        for (String key : map1.keySet()) {
+            assertsList.add(() -> assertTariffs(map1.get(key), map2.get(key)));
+        }
+        Assertions.assertAll(assertsList);
+    }
+
+    public static void assertTariffs(Tariff tariff, Tariff tariff1) {
+        assertAll(
+                () -> assertEquals(tariff.getId(), tariff1.getId()),
+                () -> assertEquals(tariff.getType(), tariff1.getType()),
+                () -> assertEquals(tariff.getInterestRate(), tariff1.getInterestRate())
+        );
     }
 }

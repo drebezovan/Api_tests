@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-class CreditServicesUserControllerTest extends BaseTest{
+class CreditServicesUserControllerTest {
 
     public static Map<String, Tariff> tariffMap;
 

@@ -15,6 +15,7 @@ import com.mts.creditapp.repository.TariffRep;
 import com.mts.creditapp.service.CreditUserServices;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -24,6 +25,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class CreditUserServicesImpl implements CreditUserServices {
+    @Value("${fixedRate:120000}")
+    private int fixedRate;
     @Autowired
     private final TariffRep tariffRep;
     @Autowired
@@ -52,7 +55,7 @@ public class CreditUserServicesImpl implements CreditUserServices {
                 }
                 else if (loanOrderList.get(i).getStatus().compareTo("REFUSED")==0
                         && new Timestamp(System.currentTimeMillis()).getTime()
-                        -loanOrderList.get(i).getTimeUpdate().getTime()<=120000) {
+                        -loanOrderList.get(i).getTimeUpdate().getTime()<=fixedRate) {
                     throw new CreditException("TRY_LATER", "Попробуйте позже");
                 }
             }

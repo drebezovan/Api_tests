@@ -6,24 +6,25 @@ import constants.OrderStatus;
 import constants.TariffType;
 import dto.ErrorDTO;
 import dto.GetStatusOrder;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import spec.CreateOrderSpec;
 import spec.DeleteOrderSpec;
 import spec.GetStatusOrderSpec;
 import spec.GetTariffsSpec;
+import utils.TableUpdater;
 
+import java.io.FileNotFoundException;
 import java.util.Map;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@Execution(ExecutionMode.CONCURRENT)
 public class CreditServicesUserControllerGetAndDeleteTest {
     public static Map<String, Tariff> tariffMap;
     public String orderId;
-    long userCounter = 1;
+    static long userCounter = 1;
 
     @BeforeAll
     static void getTariffsTypes() {
@@ -34,7 +35,14 @@ public class CreditServicesUserControllerGetAndDeleteTest {
     @DisplayName("Предусловие с созданием заявки")
     public void initOrder() {
         orderId = CreateOrderSpec.createOrderSuccessful(TariffType.BUSINESS, tariffMap, userCounter);
+    }
+    @AfterEach
+    public void updateCounter(){
         userCounter++;
+    }
+    @AfterAll
+    public static void cleanTable() throws FileNotFoundException {
+        TableUpdater.truncateTable("loan_order");
     }
 
     @Test

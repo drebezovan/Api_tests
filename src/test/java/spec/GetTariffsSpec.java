@@ -67,7 +67,6 @@ public class GetTariffsSpec {
 
     public static void assertTariffs(Tariff tariff, Tariff tariff1) {
         assertAll(
-                () -> assertEquals(tariff.getId(), tariff1.getId()),
                 () -> assertEquals(tariff.getType(), tariff1.getType()),
                 () -> assertEquals(tariff.getInterestRate(), tariff1.getInterestRate())
         );

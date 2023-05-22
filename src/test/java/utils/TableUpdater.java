@@ -15,26 +15,27 @@ import java.util.Scanner;
 public class TableUpdater {
     public static void truncateTable(String tableName) throws FileNotFoundException {
         Yaml yaml = new Yaml();
-        Map<String, String> properties = yaml.load(new FileInputStream("src/test/resources/junit-platform-properties.yml"));
+        Map<String, String> properties = yaml.load(new FileInputStream("src/test/resources/properties.yml"));
 
         String url = properties.get("url");
         String username = properties.get("username");
         String password = properties.get("password");
 
-        try (Connection connection = DriverManager.getConnection(url, username, password);
-             Statement statement = connection.createStatement()) {
-
-            String truncateQuery = "TRUNCATE TABLE " + tableName + " CASCADE" ;
+        try (
+                Connection connection = DriverManager.getConnection(url, username, password);
+                Statement statement = connection.createStatement()
+        ) {
+            String truncateQuery = "TRUNCATE TABLE " + tableName + " CASCADE";
             statement.executeUpdate(truncateQuery);
             System.out.println("Table truncated successfully.");
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    public static void initialiseTariffs(String tableName) throws FileNotFoundException {
+
+    public static void initialiseTariffs() throws FileNotFoundException {
         Yaml yaml = new Yaml();
-        Map<String, String> properties = yaml.load(new FileInputStream("src/test/resources/junit-platform-properties.yml"));
+        Map<String, String> properties = yaml.load(new FileInputStream("src/test/resources/properties.yml"));
 
         String url = properties.get("url");
         String username = properties.get("username");
@@ -42,11 +43,11 @@ public class TableUpdater {
         String query = new Scanner(new File("src/main/resources/tariffInitialisation.sql"))
                 .useDelimiter("\\Z").next();
 
-        try (Connection connection = DriverManager.getConnection(url, username, password);
-             Statement statement = connection.createStatement()) {
-
+        try (
+                Connection connection = DriverManager.getConnection(url, username, password);
+                Statement statement = connection.createStatement()
+        ) {
             statement.executeUpdate(query);
-
         } catch (SQLException e) {
             e.printStackTrace();
         }

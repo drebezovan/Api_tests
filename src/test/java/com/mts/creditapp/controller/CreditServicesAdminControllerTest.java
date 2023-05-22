@@ -1,40 +1,39 @@
 package com.mts.creditapp.controller;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import spec.CreateTariffSpec;
 import utils.TableUpdater;
 
 import java.io.FileNotFoundException;
-@Execution(ExecutionMode.CONCURRENT)
+
 public class CreditServicesAdminControllerTest {
     @AfterAll
     public static void cleanTable() throws FileNotFoundException {
         TableUpdater.truncateTable("loan_order");
         TableUpdater.truncateTable("tariff");
-        TableUpdater.initialiseTariffs("tariff");
+        TableUpdater.initialiseTariffs();
     }
+
+    @Tags(value = {@Tag("Smoke"), @Tag("Regress")})
     @Test
     void addTariffSuccessful() {
-        CreateTariffSpec.createTariff("MORTGAGE", "5.9%");
+        CreateTariffSpec.createTariffSuccessful("MORTGAGE", "5.9%");
     }
-    @Test
-    void addTariffWithNegativeInterestRate() {
-        CreateTariffSpec.createTariffWithNegativeInterestRate("SUPER CREDIT", Integer.MIN_VALUE+"%");
-    }
-    @Test
-    void addTariffWithoutTypeFailure() {
-        CreateTariffSpec.createTariffWithoutType( "15%");
-    }
-    @Test
-    void addTariffWithoutInterestRateFailure() {
-        CreateTariffSpec.createTariffWithoutInterestRate("NEW TARIFF" );
-    }
-    @Test
-    void addExistingTariff() {
-        CreateTariffSpec.createExistingTariff("BUSINESS", "2%");
+
+    @Tag("Regress")
+    @ParameterizedTest
+    @CsvSource({
+            "SUPER CREDIT, -2000000%",
+            "            , 15%      ",
+            "NEW TARIFF  ,          ",
+            "BUSINESS    , 2%       "})
+    void addWrongTariffs(String type, String interestRate) {
+        CreateTariffSpec.createTariffError(type, interestRate);
     }
 
 }

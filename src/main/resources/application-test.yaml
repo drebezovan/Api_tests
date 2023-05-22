@@ -11,12 +11,6 @@ spring:
     username: user
     password: 1234
 
-
-  jpa:
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-
-fixedRate: 2000
-initialDelay: 2000
+fixedRate: 5000
+initialDelay: 5000
+waitingTime: 5000

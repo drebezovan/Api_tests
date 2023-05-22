@@ -1,7 +1,6 @@
 package spec;
 
 import dto.GetStatusOrder;
-import dto.GetTariffsResponse;
 import io.restassured.http.ContentType;
 
 import static io.restassured.RestAssured.given;

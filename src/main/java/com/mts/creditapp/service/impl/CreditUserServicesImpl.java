@@ -25,8 +25,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class CreditUserServicesImpl implements CreditUserServices {
-    @Value("${fixedRate:120000}")
-    private int fixedRate;
+    @Value("${waitingTime:120000}")
+    private int waitingTime;
     @Autowired
     private final TariffRep tariffRep;
     @Autowired
@@ -55,7 +55,7 @@ public class CreditUserServicesImpl implements CreditUserServices {
                 }
                 else if (loanOrderList.get(i).getStatus().compareTo("REFUSED")==0
                         && new Timestamp(System.currentTimeMillis()).getTime()
-                        -loanOrderList.get(i).getTimeUpdate().getTime()<=fixedRate) {
+                        -loanOrderList.get(i).getTimeUpdate().getTime()<=waitingTime) {
                     throw new CreditException("TRY_LATER", "Попробуйте позже");
                 }
             }

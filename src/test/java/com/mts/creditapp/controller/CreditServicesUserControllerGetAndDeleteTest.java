@@ -1,14 +1,12 @@
 package com.mts.creditapp.controller;
 
-import com.mts.creditapp.entity.tableEntities.Tariff;
 import constants.ErrorCode;
 import constants.OrderStatus;
 import constants.TariffType;
 import dto.ErrorDTO;
 import dto.GetStatusOrder;
+import dto.TariffDTO;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import spec.CreateOrderSpec;
 import spec.DeleteOrderSpec;
 import spec.GetStatusOrderSpec;
@@ -20,63 +18,86 @@ import java.util.Map;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
-@Execution(ExecutionMode.CONCURRENT)
+
 public class CreditServicesUserControllerGetAndDeleteTest {
-    public static Map<String, Tariff> tariffMap;
-    public String orderId;
-    static long userCounter = 1;
+    public static Map<String, TariffDTO> tariffMap;
 
     @BeforeAll
     static void getTariffsTypes() {
         tariffMap = GetTariffsSpec.getTariffsMap();
     }
 
-    @BeforeEach
-    @DisplayName("Предусловие с созданием заявки")
-    public void initOrder() {
-        orderId = CreateOrderSpec.createOrderSuccessful(TariffType.BUSINESS, tariffMap, userCounter);
-    }
-    @AfterEach
-    public void updateCounter(){
-        userCounter++;
-    }
     @AfterAll
     public static void cleanTable() throws FileNotFoundException {
         TableUpdater.truncateTable("loan_order");
     }
 
+    @Tags(value = {@Tag("Smoke"), @Tag("Regress")})
     @Test
     void getStatusOrder() {
-       GetStatusOrder orderStatus = GetStatusOrderSpec.getStatusOrder(orderId);
-       assertEquals(OrderStatus.IN_PROGRESS.toString(), orderStatus.getOrderStatus());
-    }
-    @Test
-    void getStatusOrderAfterDecision() throws InterruptedException {
-        Thread.sleep(3000);
-       GetStatusOrder orderStatus = GetStatusOrderSpec.getStatusOrder(orderId);
-       assertTrue(Objects.equals(OrderStatus.REFUSED.toString(), orderStatus.getOrderStatus()) || Objects.equals(OrderStatus.APPROVED.toString(), orderStatus.getOrderStatus()));
+        String orderId = CreateOrderSpec.createOrderSuccessful(TariffType.BUSINESS, tariffMap, 1);
+        GetStatusOrder orderStatus = GetStatusOrderSpec.getStatusOrder(orderId);
+        assertEquals(OrderStatus.IN_PROGRESS.toString(), orderStatus.getOrderStatus());
     }
 
+    @Tag("Regress")
+    @Test
+    void getStatusOrderAfterDecision() throws InterruptedException {
+        String orderId = CreateOrderSpec.createOrderSuccessful(TariffType.BUSINESS, tariffMap, 2);
+        Thread.sleep(5100);
+        GetStatusOrder orderStatus = GetStatusOrderSpec.getStatusOrder(orderId);
+        assertTrue(Objects.equals(OrderStatus.REFUSED.toString(), orderStatus.getOrderStatus()) || Objects.equals(OrderStatus.APPROVED.toString(), orderStatus.getOrderStatus()));
+    }
+
+    @Tag("Regress")
+    @Test
+    void getStatusOrderAfterUpdate() throws InterruptedException {
+        String orderId = CreateOrderSpec.createOrderSuccessful(TariffType.BUSINESS, tariffMap, 3);
+        Thread.sleep(5050);
+        GetStatusOrder orderStatus = GetStatusOrderSpec.getStatusOrder(orderId);
+        if (Objects.equals(orderStatus.getOrderStatus(), OrderStatus.APPROVED.toString())) {
+            ErrorDTO error = CreateOrderSpec.createOrderError(TariffType.BUSINESS, tariffMap, 3);
+            assertAll(
+                    () -> assertEquals(ErrorCode.LOAN_ALREADY_APPROVED.toString(), error.getCode()),
+                    () -> assertEquals("Заявка рассмотрена", error.getMessage())
+            );
+        } else if (Objects.equals(orderStatus.getOrderStatus(), OrderStatus.REFUSED.toString())) {
+            Thread.sleep(100);
+            ErrorDTO error = CreateOrderSpec.createOrderError(TariffType.BUSINESS, tariffMap, 3);
+            assertAll(
+                    () -> assertEquals(ErrorCode.TRY_LATER.toString(), error.getCode()),
+                    () -> assertEquals("Попробуйте позже", error.getMessage())
+            );
+        }
+    }
+
+    @Tags(value = {@Tag("Smoke"), @Tag("Regress")})
     @Test
     void deleteOrderSuccessful() throws InterruptedException {
-        Thread.sleep(3000);
-        DeleteOrderSpec.deleteOrderSuccessful(userCounter, orderId);
+        String orderId = CreateOrderSpec.createOrderSuccessful(TariffType.BUSINESS, tariffMap, 4);
+        Thread.sleep(5100);
+        DeleteOrderSpec.deleteOrderSuccessful(4, orderId);
     }
+
+    @Tag("Regress")
     @Test
-    void deleteExistentOrderFailure(){
-        ErrorDTO error = DeleteOrderSpec.deleteNonexistentOrder(userCounter, orderId);
+    void deleteExistentOrderFailure() {
+        String orderId = CreateOrderSpec.createOrderSuccessful(TariffType.BUSINESS, tariffMap, 5);
+        ErrorDTO error = DeleteOrderSpec.deleteNonexistentOrder(5, orderId);
         assertAll(
-                ()-> assertEquals(ErrorCode.ORDER_IMPOSSIBLE_TO_DELETE.toString(), error.getCode()),
+                () -> assertEquals(ErrorCode.ORDER_IMPOSSIBLE_TO_DELETE.toString(), error.getCode()),
                 () -> assertEquals("Невозможно удалить заявку", error.getMessage())
         );
     }
+
+    @Tag("Regress")
     @Test
-    void deleteNonexistentOrder(){
+    void deleteNonexistentOrder() {
+        String orderId = CreateOrderSpec.createOrderSuccessful(TariffType.BUSINESS, tariffMap, 6);
         ErrorDTO error = DeleteOrderSpec.deleteNonexistentOrder(0L, orderId);
         assertAll(
-                ()-> assertEquals(ErrorCode.ORDER_NOT_FOUND.toString(), error.getCode()),
+                () -> assertEquals(ErrorCode.ORDER_NOT_FOUND.toString(), error.getCode()),
                 () -> assertEquals("Заявка не найдена", error.getMessage())
         );
     }
-
 }

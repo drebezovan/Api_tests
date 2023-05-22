@@ -1,15 +1,10 @@
 package com.mts.creditapp.controller;
 
-import com.mts.creditapp.entity.tableEntities.Tariff;
 import constants.ErrorCode;
 import constants.TariffType;
 import dto.ErrorDTO;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
+import dto.TariffDTO;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import spec.CreateOrderSpec;
@@ -23,45 +18,59 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Execution(ExecutionMode.CONCURRENT)
 class CreditServicesUserControllerTest {
 
-    public static Map<String, Tariff> tariffMap;
-    static int userCounter = 100;
+    public static Map<String, TariffDTO> tariffMap;
+    static int userCounter = 101;
 
     @BeforeAll
     static void getTariffsTypesAndCreateUser() {
         tariffMap = GetTariffsSpec.getTariffsMap();
-        CreateOrderSpec.createOrderSuccessful(TariffType.BUSINESS, tariffMap, userCounter);
     }
+
     @AfterAll
     public static void cleanTable() throws FileNotFoundException {
         TableUpdater.truncateTable("loan_order");
     }
+
     @AfterEach
-    public void updateCounter(){
+    public void updateCounter() {
         userCounter++;
     }
+
+    @Tag("Regress")
     @Test
     void addAlreadyExistingOrder() {
-        ErrorDTO errorDTO = CreateOrderSpec.createOrderError(TariffType.CONSUMER, tariffMap, 100);
+        CreateOrderSpec.createOrderSuccessful(TariffType.BUSINESS, tariffMap, 100);
+        ErrorDTO errorDTO = CreateOrderSpec.createOrderError(TariffType.BUSINESS, tariffMap, 100);
         assertAll(
                 () -> assertEquals(ErrorCode.LOAN_CONSIDERATION.toString(), errorDTO.getCode()),
                 () -> assertEquals("Заявка рассматривается", errorDTO.getMessage())
         );
     }
+
+    @Tags(value = {@Tag("Smoke"), @Tag("Regress")})
     @Test
     void getTariffs() throws IOException {
         GetTariffsSpec.assertMapEquals(GetTariffsSpec.getReferenceTariffsMap(), tariffMap);
     }
 
+    @Tags(value = {@Tag("Smoke"), @Tag("Regress")})
+    @Test
+    void addOrderSmoke() {
+        CreateOrderSpec.createOrderSuccessful(TariffType.RETIRED, tariffMap, userCounter);
+    }
+
+    @Tag("Regress")
     @ParameterizedTest
-    @EnumSource(TariffType.class)
+    @EnumSource(names = {"CONSUMER", "BUSINESS"})
     void addOrder(TariffType tariffType) {
         CreateOrderSpec.createOrderSuccessful(tariffType, tariffMap, userCounter);
     }
+
+    @Tag("Regress")
     @Test
-    void addOrderNonexistentTariff(){
+    void addOrderNonexistentTariff() {
         ErrorDTO errorDTO = CreateOrderSpec.createOrderFailure();
         assertAll(
                 () -> assertEquals(ErrorCode.TARIFF_NOT_FOUND.toString(), errorDTO.getCode()),

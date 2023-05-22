@@ -20,6 +20,7 @@ public class DeleteOrderSpec {
                 .then()
                 .spec(BaseSpec.getResponseSpec(200));
     }
+
     public static ErrorDTO deleteNonexistentOrder(long userId, String orderId) {
         DeleteOrderRequest body = new DeleteOrderRequest();
         body.setUserId(userId);

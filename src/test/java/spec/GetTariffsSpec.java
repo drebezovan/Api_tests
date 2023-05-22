@@ -3,16 +3,14 @@ package spec;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.mts.creditapp.entity.tableEntities.Tariff;
 import dto.GetTariffsResponse;
+import dto.TariffDTO;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.File;
 import java.io.IOException;
-
-import org.junit.jupiter.api.function.Executable;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,8 +29,8 @@ public class GetTariffsSpec {
 
     static File file = new File("src/test/java/testData/defaultTariffs.yml");
 
-    public static Map<String, Tariff> getTariffsMap() {
-        List<Tariff> tariffs = given()
+    public static Map<String, TariffDTO> getTariffsMap() {
+        List<TariffDTO> tariffs = given()
                 .spec(BaseSpec.getRequestSpec())
                 .when()
                 .contentType(ContentType.JSON)
@@ -40,23 +38,23 @@ public class GetTariffsSpec {
                 .then()
                 .spec(BaseSpec.getResponseSpec(200))
                 .extract().body().jsonPath().getObject("data", GetTariffsResponse.class).getTariffs();
-        Map<String, Tariff> hashMap = new HashMap<>();
-        for (Tariff tariff : tariffs) {
+        Map<String, TariffDTO> hashMap = new HashMap<>();
+        for (TariffDTO tariff : tariffs) {
             hashMap.put(tariff.getType(), tariff);
         }
         return hashMap;
     }
 
-    public static Map<String, Tariff> getReferenceTariffsMap() throws IOException {
-        List<Tariff> tariffs = mapper.readValue(file, GetTariffsResponse.class).getTariffs();
-        Map<String, Tariff> hashMap = new HashMap<>();
-        for (Tariff tariff : tariffs) {
+    public static Map<String, TariffDTO> getReferenceTariffsMap() throws IOException {
+        List<TariffDTO> tariffs = mapper.readValue(file, GetTariffsResponse.class).getTariffs();
+        Map<String, TariffDTO> hashMap = new HashMap<>();
+        for (TariffDTO tariff : tariffs) {
             hashMap.put(tariff.getType(), tariff);
         }
         return hashMap;
     }
 
-    public static void assertMapEquals(Map<String, Tariff> map1, Map<String, Tariff> map2) {
+    public static void assertMapEquals(Map<String, TariffDTO> map1, Map<String, TariffDTO> map2) {
         List<Executable> assertsList = new ArrayList<>();
         assertsList.add(() -> assertEquals(map1.size(), map2.size()));
         for (String key : map1.keySet()) {
@@ -65,7 +63,7 @@ public class GetTariffsSpec {
         Assertions.assertAll(assertsList);
     }
 
-    public static void assertTariffs(Tariff tariff, Tariff tariff1) {
+    public static void assertTariffs(TariffDTO tariff, TariffDTO tariff1) {
         assertAll(
                 () -> assertEquals(tariff.getType(), tariff1.getType()),
                 () -> assertEquals(tariff.getInterestRate(), tariff1.getInterestRate())

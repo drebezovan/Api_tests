@@ -14,6 +14,4 @@ public class Tariff {
     private String type;
     private String interestRate;
 
-    public Tariff() {
-    }
 }

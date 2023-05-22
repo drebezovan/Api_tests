@@ -122,10 +122,4 @@ public class LoanOrderRepImpl implements LoanOrderRep {
     public int deleteLoanOrder(UUID orderId, long userId){
         return jdbcTemplate.update(DELETE_ORDER, userId, orderId.toString());
     }
-
-    @Override
-    public void deleteAllOrders() {
-            String sql = "TRUNCATE TABLE loan_order";
-            jdbcTemplate.execute(sql);
-    }
 }

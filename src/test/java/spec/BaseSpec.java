@@ -9,6 +9,7 @@ import io.restassured.specification.ResponseSpecification;
 
 public class BaseSpec {
     private final static String URL = "http://localhost:8080";
+
     public static RequestSpecification getRequestSpec() {
         return new RequestSpecBuilder()
                 .setBaseUri(URL)

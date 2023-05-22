@@ -1,10 +1,10 @@
 package spec;
 
-import com.mts.creditapp.entity.tableEntities.Tariff;
 import constants.TariffType;
 import dto.CreateOrderRequest;
 import dto.CreateOrderResponse;
 import dto.ErrorDTO;
+import dto.TariffDTO;
 import io.restassured.http.ContentType;
 
 import java.util.Map;
@@ -13,7 +13,7 @@ import static io.restassured.RestAssured.given;
 
 public class CreateOrderSpec {
 
-    public static String createOrderSuccessful(TariffType tariffType, Map<String, Tariff> tariffMap, long userId) {
+    public static String createOrderSuccessful(TariffType tariffType, Map<String, TariffDTO> tariffMap, long userId) {
         CreateOrderRequest body = new CreateOrderRequest();
         body.setTariffId((int) tariffMap.get(tariffType.name()).getId());
         body.setUserId(userId);
@@ -43,7 +43,7 @@ public class CreateOrderSpec {
                 .extract().body().jsonPath().getObject("error", ErrorDTO.class);
     }
 
-    public static ErrorDTO createOrderError(TariffType tariffType, Map<String, Tariff> tariffMap, long userId) {
+    public static ErrorDTO createOrderError(TariffType tariffType, Map<String, TariffDTO> tariffMap, long userId) {
         CreateOrderRequest body = new CreateOrderRequest();
         body.setTariffId((int) tariffMap.get(tariffType.name()).getId());
         body.setUserId(userId);

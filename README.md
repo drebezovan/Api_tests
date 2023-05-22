@@ -6,65 +6,49 @@ MTS_Credit_App_Tests - это тесты для сервиса подачи за
 - Создать базу данных с названием "MTS_Credit_App_TESTS" с пользователем "user" и паролем "1234".
 
 ## Запуск проекта
-Запустить тестируемое приложение нужно при помощи следующей команды:
+Запустить тестируемое приложение с профилем test нужно при помощи следующей команды:
 ```bash
 mvn spring-boot:run -Dspring-boot.run.profiles=test
 ```
+Данный профиль добавлен для того, чтобы запускать наше приложение в более подходящей для запуска тестов конфигурации (уменьшенное время для обработки статусов заявок).
 
-## Причины установки MTS_Credit_App_Tests
-Данный проект запускается для того, чтобы сократить время запуска сервера и начала его работы, за которые отвечают переменные initialDelay и fixedRate,
-которые в проекте разработчика захардкожены (см. src/main/java/service/impl/ОщиServiceImpl.class).
-В проекте "MTS_Credit_App_Tests" эти значения вынесены в переменные в файл "application-test.yaml".
+## Параметризованные тесты
+Используя junit аннотацию @ParameterizedTest написаны параметризованные тесты. Пример одно такого теста представлен ниже:
+```
+    @ParameterizedTest
+    @EnumSource(names = {"CONSUMER", "BUSINESS"})
+    void addOrder(TariffType tariffType) {
+        CreateOrderSpec.createOrderSuccessful(tariffType, tariffMap, userCounter);
+    }
+```
 
-Также в проекте разработчика захардкожено время ожидания обновления статуса заявки и установлено значение 2 минуты (src/main/java/service/impl/CreditUserServicesImpl.class),
-для сокращения времени выполнения тестов это значение вынесено в переменную waitingTime в файл "application-test.yaml", в котором его можно менять.
+## Настройка многопоточного запуска тестов
+Для настройки многопоточного запуска тестов использованы следующие параметры конфигурации:
+```
+junit.jupiter.execution.parallel.enabled = true
+junit.jupiter.execution.parallel.mode.default = concurrent
+junit.jupiter.execution.parallel.mode.classes.default = same_thread
+```
+В данном проекте настроен последовательный запуск классов верхнего уровня и параллельный запуск их методов.
 
+Также добавлены параметры конфигурации для записи выводов и ошибок:
+```
+junit.platform.output.capture.stdout = true
+junit.platform.output.capture.stderr = true
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+## Создание Test Suites
+При помощи аннотаций @Tag() и @Tags() созданы два тестовых набора: Smoke и Regress.
+Примеры использования аннотаций:
+```
+    @Tags(value = {@Tag("Smoke"), @Tag("Regress")})
+    @Test
+    void getTariffs() throws IOException {
+        GetTariffsSpec.assertMapEquals(GetTariffsSpec.getReferenceTariffsMap(), tariffMap);
+    }
+```
+Для запуска тестового набора в IntelliJ IDEA настроены параметры Run/Edit Configurations (см. картинку):
+![Настройка параметров для запуска Test Suite](img.png)
 
 
 

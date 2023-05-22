@@ -6,11 +6,7 @@ spring:
     enabled: true
     change-log: classpath:db_changelog.yaml
   datasource:
-    url: "jdbc:postgresql://localhost:5432/MTS_Credit_App_TESTS"
+    url: "jdbc:postgresql://localhost:5432/MTS Credit App TESTS"
     driver-class-name: org.postgresql.Driver
     username: user
-    password: 1234
-
-fixedRate: 5000
-initialDelay: 5000
-waitingTime: 5000
+    password: 12345

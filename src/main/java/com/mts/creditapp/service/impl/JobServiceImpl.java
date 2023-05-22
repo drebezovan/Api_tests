@@ -23,7 +23,7 @@ public class JobServiceImpl implements JobService {
     @Autowired
     private LoanOrderRep loanOrderRep;
     @Async
-    @Scheduled(fixedRateString = "${fixedRate:120000}", initialDelayString = "${initialDelay:100000}")
+    @Scheduled(fixedRate = 120000, initialDelay = 10000)
     public void reviewOrder(){
         List<Long> ordersWithInProgressStatus =  loanOrderRep.getAllOrdersWithStatus("IN_PROGRESS").get();
         for (int i=0; i<ordersWithInProgressStatus.size(); i++){
